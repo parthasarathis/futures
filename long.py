@@ -73,7 +73,7 @@ trailing_percentage = args.tp
 
 ticker = partha_account.futures_symbol_ticker(symbol=symbol)
 market_price = float(ticker['price'])
-amount = amount_in_dollars / market_price
+amount = int(amount_in_dollars / market_price)
 
 # Place a long order
 order = partha_account.futures_create_order(
