@@ -42,7 +42,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('symbol', type=str,
                     help='The trading symbol to use (e.g. BTCUSDT)')
 parser.add_argument('amount', type=float,
-                    help='The amount to buy in the base asset (e.g. 0.1 for 0.1 BTC)')
+                    help='The amount to buy in the dollars (e.g. 100)')
 # parser.add_argument('entry_price', type=float,help='The entry price for the long order')
 parser.add_argument(
     'tp', type=float, help='The trailing stop loss percentage (default: 0.5)')
@@ -67,10 +67,13 @@ def get_position():
 
 # Set the order parameters
 symbol = args.symbol
-amount = args.amount
+amount_in_dollars = args.amount
 # entry_price = str(args.entry_price)
 trailing_percentage = args.tp
 
+ticker = partha_account.futures_symbol_ticker(symbol=symbol)
+market_price = float(ticker['price'])
+amount = amount_in_dollars / market_price
 
 # Place a long order
 order = partha_account.futures_create_order(
@@ -93,8 +96,8 @@ while True:
     ticker = partha_account.futures_symbol_ticker(symbol=symbol)
     market_price = float(ticker['price'])
     trail_price = float(market_price) * (1 - args.tp / 100)
-    print("ep = {} : cp = {:10.4f} : sp : {:10.4f} : tp = {:10.4f} : pnl = {:10.4f} : fpnl :{:10.4f}".format(entry_price,
-                                                                                                             market_price, stop_price, trail_price, (((market_price/float(entry_price))-1)*50), (((float(stop_price)/float(entry_price))-1)*50)), end="\r")
+    print("pnl = {:10.4f} : fpnl :{:10.4f}".format((((market_price/float(entry_price))-1)
+          * 50), (((float(stop_price)/float(entry_price))-1)*50)), end="\r")
 
     # Calculate the trailing stop price as a percentage of the entry price
 
