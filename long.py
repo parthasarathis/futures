@@ -43,7 +43,7 @@ parser.add_argument('symbol', type=str,
                     help='The trading symbol to use (e.g. BTCUSDT)')
 parser.add_argument('amount', type=float,
                     help='The amount to buy in the dollars (e.g. 100)')
-# parser.add_argument('entry_price', type=float,help='The entry price for the long order')
+parser.add_argument('leverage', type=int, help='leverage to set')
 parser.add_argument(
     'tp', type=float, help='The trailing stop loss percentage (default: 0.5)')
 args = parser.parse_args()
@@ -70,10 +70,13 @@ symbol = args.symbol
 amount_in_dollars = args.amount
 # entry_price = str(args.entry_price)
 trailing_percentage = args.tp
+lev = args.leverage
 
 ticker = partha_account.futures_symbol_ticker(symbol=symbol)
+partha_account.futures_change_leverage(leverage=lev, symbol=symbol)
 market_price = float(ticker['price'])
 amount = int(amount_in_dollars / market_price)
+trailing_percentage = args.tp
 
 # Place a long order
 order = partha_account.futures_create_order(
@@ -88,7 +91,7 @@ print('Long order placed: \n')
 
 entry_price = get_position()
 
-stop_price = float(entry_price) * (1 - args.tp / 100)
+stop_price = float(entry_price) * (1 - trailing_percentage / 100)
 
 # Start monitoring the price and adjusting the stop price
 while True:
@@ -96,9 +99,14 @@ while True:
     ticker = partha_account.futures_symbol_ticker(symbol=symbol)
     market_price = float(ticker['price'])
     trail_price = float(market_price) * (1 - args.tp / 100)
-    print("pnl = {:10.4f} : fpnl :{:10.4f}".format((((market_price/float(entry_price))-1)
-          * 50), (((float(stop_price)/float(entry_price))-1)*50)), end="\r")
+    current_pnl = (((market_price/float(entry_price))-1)
+                   * lev)
+    fixed_pnl = (((float(stop_price)/float(entry_price))-1)*lev)
+    print("SP = {:12.7f} : pnl = {:12.7f} : fpnl :{:12.7f}".format(
+        stop_price, current_pnl, fixed_pnl), end="\r")
 
+    if current_pnl >= float(lev):
+        trailing_percentage = 1
     # Calculate the trailing stop price as a percentage of the entry price
 
     # If the trailing stop price is higher than the current stop price,
@@ -108,7 +116,7 @@ while True:
         # print('Stop loss updated to' + "{:10.4f}".format(stop_price) + "\n")
 
     # If the market price drops below the stop price, sell all the order
-    if market_price < float(stop_price):
+    if (market_price < float(stop_price)) or current_pnl > 100:
         order = partha_account.futures_create_order(
             symbol=symbol,
             side=SIDE_SELL,

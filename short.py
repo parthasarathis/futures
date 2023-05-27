@@ -43,7 +43,7 @@ parser.add_argument('symbol', type=str,
                     help='The trading symbol to use (e.g. BTCUSDT)')
 parser.add_argument('amount', type=float,
                     help='The amount to buy in the base asset (e.g. 0.1 for 0.1 BTC)')
-# parser.add_argument('entry_price', type=float,help='The entry price for the long order')
+parser.add_argument('leverage', type=int, help='leverage to set')
 parser.add_argument(
     'tp', type=float, help='The trailing stop loss percentage (default: 0.5)')
 args = parser.parse_args()
