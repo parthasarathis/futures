@@ -39,9 +39,9 @@ def get_tickers(partha_account,yesterday_df,yesterhour_df):
     table_data['price'] = pd.to_numeric(table_data['price'], errors='coerce')
     table_data ['day_change']= (table_data['price'] - table_data['Y_D_C_Price']) /table_data['Y_D_C_Price'] * 100
     table_data ['hour_change']= (table_data['price'] - table_data['Y_H_C_Price']) /table_data['Y_H_C_Price'] * 100
-    table_data = table_data.sort_values('hour_change',ascending=False)  
-    print(tabulate(table_data.head(), headers='keys', tablefmt='psql'))
-    print(tabulate(table_data.tail(), headers='keys', tablefmt='psql'))
+    table_data = table_data.sort_values('day_change',ascending=False)  
+    print(tabulate(table_data.head(8), headers='keys', tablefmt='psql'))
+    print(tabulate(table_data.tail(8), headers='keys', tablefmt='psql'))
     
 
 def get_data(new_data=False):
@@ -110,8 +110,8 @@ def get_hour_data(new_data=False):
         busd_list = column_name_df['symbol'].to_list()
 
         ti_st = int(dt.datetime.now().timestamp())
-        time_stamp = int(ti_st - ti_st % 3600)
-        start_time = (time_stamp-3600) * 1000
+        time_stamp = int(ti_st - ti_st % 14400)
+        start_time = (time_stamp-14400) * 1000
         end_time = (time_stamp*1000 - 1)
         coin_data = collections.deque([], maxlen=int(len(busd_list)/1))
 
