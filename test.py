@@ -69,11 +69,11 @@ def get_tickers(partha_account,yesterday_df):
     # print(tabulate(day_df,headers='keys',tablefmt='psql'))
    
 
-    always_up = day_df[(day_df['D_C_MIN'] > 50) & (day_df['D_MIN']>-0.5)]
+    always_up = day_df[(day_df['D_C_MIN'] < 50) & (day_df['D_MIN']>-0.5)]
     print(pyfiglet.figlet_format("Always Up"))
     print(tabulate(always_up,headers='keys',tablefmt='psql'))
 
-    always_down = day_df[(day_df['D_C_MAX'] < -50) & (day_df['D_MAX']<0.5)]
+    always_down = day_df[(day_df['D_C_MAX'] > -50) & (day_df['D_MAX']<0.5)]
     print(pyfiglet.figlet_format("Always Down"))
     print(tabulate(always_down,headers='keys',tablefmt='psql'))
 
