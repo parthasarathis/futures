@@ -141,7 +141,7 @@ def get_data(new_data=False):
         data = 0
         for coin in busd_list:
             klines = partha_account.futures_historical_klines(
-                coin, partha_account.KLINE_INTERVAL_1DAY, "1 day ago UTC")
+                coin, partha_account.KLINE_INTERVAL_1DAY, "1  ago UTC")
             if len(klines) > 0:
                 res = {key_list[i]: klines[0][i] for i in range(len(key_list))}
             else:
