@@ -23,7 +23,7 @@ endpoint = "https://fapi.binance.com/fapi/v1/klines"
 # Parameters for the API request
 
 interval = "1d"
-limit = 10
+limit = 15
 
 # Create an empty DataFrame
 df_combined = pd.DataFrame()

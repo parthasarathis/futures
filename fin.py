@@ -1,7 +1,7 @@
 import ccxt
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 import time
+import pyfiglet
+import schedule
 
 def plot_order_book_histogram(order_book,current_price,max_bid_quantity,max_bid_price, max_ask_quantity,max_ask_price):
     bids = order_book['bids']
@@ -21,29 +21,10 @@ def plot_order_book_histogram(order_book,current_price,max_bid_quantity,max_bid_
     ask_prices, ask_quantities = zip(*asks)
 
 
-    plt.clf()  # Clear the previous plot
-    plt.hist(bid_prices, bins=100, weights=bid_quantities, color='g', alpha=0.7, label='Bids', orientation='horizontal')
-    plt.hist(ask_prices, bins=100, weights=ask_quantities, color='r', alpha=0.7, label='Asks', orientation='horizontal')
-    plt.axhline(y=max_ask_price, color='red', linestyle='--', label='Max Bid Quantity')
-    plt.axhline(y=max_bid_price, color='green', linestyle='--', label='Max Ask Quantity')
-    plt.axhline(y=current_price, color='b', linestyle='--', label='Current Price')
-    
-    plt.text(0.95, 0.95, f"Resistance: {max_ask_price:.6f}", ha='right', va='top', transform=plt.gca().transAxes,color ='red',
-             fontsize=8, bbox=dict(facecolor='white', alpha=0.5))
-    plt.text(0.95, 0.90, f"Current Price: {current_price:.6f}", ha='right', va='top', transform=plt.gca().transAxes,color ='Black',
-             fontsize=8, bbox=dict(facecolor='white', alpha=0.5))
-    plt.text(0.95, 0.85, f"support: {max_bid_price:.6f}", ha='right', va='top', transform=plt.gca().transAxes,color ='green',
-             fontsize=8, bbox=dict(facecolor='white', alpha=0.5))
-    
-    plt.plot(bid_cumulative_sum, bid_prices, color='b', linestyle='-', linewidth=2, label='Cumulative Bid Quantity')
-    plt.plot(ask_cumulative_sum, ask_prices, color='r', linestyle='-', linewidth=2, label='Cumulative Ask Quantity')
-
-    plt.xlabel('Quantity')
-    plt.ylabel('Price')
-    plt.title('Binance Futures Order Book')
-    plt.legend(loc='lower right')
-    plt.grid(axis='x', linestyle='--', alpha=0.7)
-    plt.tight_layout()
+    print("\033c", end="")
+    print(pyfiglet.figlet_format(f'Resis: {max_ask_price:.6f}',font = "slscript"))
+    print(pyfiglet.figlet_format(f'CP: {current_price:.6f}',font = "slscript"))
+    print(pyfiglet.figlet_format(f'Supp: {max_bid_price:.6f}',font = "slscript"))
 
 def fetch_binance_futures_order_book(symbol, limit):
     exchange = ccxt.binance({
@@ -100,8 +81,8 @@ def update_plot(frame):
         print(f"Error: {e}")
 
 if __name__ == '__main__':
-    symbol = 'LDO/USDT'
-    limit =200
-    plt.figure(figsize=(10, 6))
-    ani = FuncAnimation(plt.gcf(), update_plot, interval=2000)  # Update plot every 5 seconds
-    plt.show()
+    symbol = 'XLM/USDT'
+    limit = 5
+    schedule.every(2).seconds.do(update_plot, frame=1)
+    while(1):
+        schedule.run_pending()

@@ -62,45 +62,47 @@ def get_tickers(partha_account,yesterday_df):
     table_data['D_C_MAX'] = table_data['D_C_MAX'].round(3)
    
     day_df = table_data[['symbol','D_OPEN','D_HIGH','D_LOW','price','D_MAX','D_MIN','D_C_MAX','D_C_MIN','PCT','D_CHANGE']]
-    day_df = day_df.sort_values('PCT',ascending=False)
+    day_df = day_df.sort_values('D_C_MIN',ascending=False)
     day_df['PCT'] = day_df['PCT'].round(2)
-   
+    
+
+    print("\033c", end="")
+    print(pyfiglet.figlet_format("month_data", font="slant"))
     #print(tabulate(day_df,headers='keys',tablefmt='psql'))
-    up_df=day_df[(day_df['D_C_MIN'] < 2.5) & (day_df['D_C_MIN'] > 1)] 
-    up_df = up_df.sort_values(by=['D_C_MIN','D_CHANGE'],ascending=[False,False])
-    up_df['Status'] = up_df['PCT'].apply(lambda x: 'going down' if   x < 78.6 else 'up')
-    down_df=day_df[(day_df['D_C_MAX'] > -2.5) & (day_df['D_C_MAX'] < -1)]
-    down_df = down_df.sort_values(by=['D_C_MAX','D_CHANGE'],ascending=[True,True])
-    down_df['Status'] = down_df['PCT'].apply(lambda x: 'going up' if  x > 23.6 else 'down')
+
+    print(tabulate(day_df,headers='keys',tablefmt='psql'))
+   
+    df_75 = day_df[day_df['PCT'] > 75]
+    df_75 = df_75[df_75['PCT'] < 100]
+    df_75 = df_75.sort_values('PCT',ascending=False)
+    print(pyfiglet.figlet_format("100% - 75%", font="slant"))
+    print(tabulate(df_75,headers='keys',tablefmt='psql'))
 
 
-    # filtered_df = df[(df['column1'] > 10) & (df['column2'] == 'value')]
+    df_50 = day_df[day_df['PCT'] > 50]
+    df_50 = df_50[df_50['PCT'] <= 75]
+    df_50 = df_50.sort_values('PCT',ascending=False)
+    print(pyfiglet.figlet_format("75% - 50%", font="slant"))
+    print(tabulate(df_50,headers='keys',tablefmt='psql'))
 
-    down_2_up = day_df[(day_df['D_C_MIN'] > 2.5) & (day_df['D_C_MIN'] < 1)]
-    down_2_up = down_2_up.sort_values(by=['D_C_MIN','D_CHANGE'],ascending=[False,False])
-    up_2_down = day_df[(day_df['D_C_MAX'] < -2.5) & (day_df['D_C_MAX'] > -1)]
-    up_2_down = up_2_down.sort_values(by=['D_C_MAX','D_CHANGE'],ascending=[True,True])
+    df_25 = day_df[day_df['PCT'] <= 50]
+    df_25 = df_25[df_25['PCT'] > 25]
+    df_25 = df_25.sort_values('PCT',ascending=False)
+    print(pyfiglet.figlet_format("50% - 25%", font="slant"))
+    print(tabulate(df_25,headers='keys',tablefmt='psql'))
 
+    df_0 = day_df[day_df['PCT'] <= 25]
+    df_0 = df_0[df_0['PCT'] >= 0]
+    df_0 = df_0.sort_values('PCT',ascending=False)
+    print(pyfiglet.figlet_format("25% - 0%", font="slant"))
+    print(tabulate(df_0,headers='keys',tablefmt='psql'))
 
-    # print(pyfiglet.figlet_format("down_2_up" , font = "slant"))
-    # print(tabulate(down_2_up,headers='keys',tablefmt='psql'))
-    # print(pyfiglet.figlet_format("up_2_down" , font = "slant"))
-    # print(tabulate(up_2_down,headers='keys',tablefmt='psql'))
-
-
-    # print(pyfiglet.figlet_format("GOING UP" , font = "slant"))
-    # print(tabulate(up_df,headers='keys',tablefmt='psql'))
-    # print(pyfiglet.figlet_format("GOING DOWN" , font = "slant"))
-    # print(tabulate(down_df,headers='keys',tablefmt='psql'))
-
-    table_data.to_csv('total_data.csv',index=True)
-    up_df.to_csv('up_df.csv',index=True)
-    down_df.to_csv('down_df.csv',index=True)
+    
     
 
 def get_data(new_data=False):
     global previous_day_df
-    if not path.exists("previous_hour_data.csv") or new_data:
+    if not path.exists("previous_month_data.csv") or new_data:
         print("previous_data_not_found:")
         tickers = partha_account.futures_ticker()
         column_name_df = pd.DataFrame(tickers)
@@ -119,7 +121,7 @@ def get_data(new_data=False):
         data = 0
         for coin in busd_list:
             klines = partha_account.futures_historical_klines(
-                coin, partha_account.KLINE_INTERVAL_1HOUR, "1 hour UTC")
+                coin, partha_account.KLINE_INTERVAL_1MONTH,"1 month ago UTC")
             if len(klines) > 0:
                 res = {key_list[i]: klines[0][i] for i in range(len(key_list))}
             else:
@@ -130,7 +132,7 @@ def get_data(new_data=False):
             print(progress, end="\r")
             coin_data.append(res)
         coin_data_df = pd.DataFrame(coin_data)
-        coin_data_df.to_csv("previous_hour_data.csv")
+        coin_data_df.to_csv("previous_month_data.csv")
         previous_day_df = coin_data_df[['symbol', 'open_price','high_price','low_price']]
         previous_day_df['high_price'] = previous_day_df['high_price'].astype(float)
         previous_day_df['open_price'] = previous_day_df['open_price'].astype(float)
@@ -145,7 +147,7 @@ def get_data(new_data=False):
         return previous_day_df
     else:
         print("Previous_data_found: Reading from CSV file")
-        coin_data_df = pd.read_csv("previous_hour_data.csv")
+        coin_data_df = pd.read_csv("previous_day_data.csv")
         previous_day_df = coin_data_df[['symbol', 'open_price','high_price','low_price']]
 
         previous_day_df['high_price'] = pd.to_numeric(previous_day_df['high_price'], errors='coerce')
@@ -167,16 +169,6 @@ def get_data(new_data=False):
 
 print(pyfiglet.figlet_format("Binance Bot"))
 previous_day_df = get_data()
+get_tickers(partha_account=partha_account, yesterday_df=previous_day_df)
 
-sch.every().day.at("05:30").do(get_data, new_data=True)
-sch.every().day.at("09:30").do(get_data, new_data=True)
-sch.every().day.at("13:30").do(get_data, new_data=True)
-sch.every().day.at("17:30").do(get_data, new_data=True)
-sch.every().day.at("21:30").do(get_data, new_data=True)
-sch.every().day.at("01:30").do(get_data, new_data=True)
-sch.every().minute.at(":05").do(get_tickers, partha_account=partha_account, yesterday_df=previous_day_df)
-sch.every().minute.at(":25").do(get_tickers, partha_account=partha_account, yesterday_df=previous_day_df)
-sch.every().minute.at(":45").do(get_tickers, partha_account=partha_account, yesterday_df=previous_day_df)
 
-while True:
-    sch.run_pending()

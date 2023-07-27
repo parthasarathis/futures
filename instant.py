@@ -62,12 +62,26 @@ def get_tickers(partha_account,df_ins_tick):
     print("\033c", end="")
 
     up_df = day_df.sort_values('D_C_MIN',ascending=False)
-    down_df = day_df.sort_values('D_C_MAX',ascending=True)
+    print(pyfiglet.figlet_format("up", font="slant"))
+    print(tabulate(up_df.head(12),headers='keys',tablefmt='psql'))
 
-    print(pyfiglet.figlet_format("UP"))
-    print(tabulate(up_df.head(10), headers='keys', tablefmt='psql'))
-    print(pyfiglet.figlet_format("DOWN"))
-    print(tabulate(down_df.head(10), headers='keys', tablefmt='psql'))
+    down_df = day_df.sort_values('D_C_MAX',ascending=True)
+    print(pyfiglet.figlet_format("down", font="slant"))
+    print(tabulate(down_df.head(12),headers='keys',tablefmt='psql'))
+
+
+
+    going_down = day_df[day_df['PCT'] < 20]
+    going_down = going_down.sort_values('D_C_MIN',ascending=True)
+    print(pyfiglet.figlet_format("going_down", font="slant"))
+    print(tabulate(going_down,headers='keys',tablefmt='psql'))
+
+
+    going_up = day_df[day_df['PCT'] > 85]
+    going_up = going_up.sort_values('D_C_MAX',ascending=False)       
+    print(pyfiglet.figlet_format("going_up", font="slant"))
+    print(tabulate(going_up,headers='keys',tablefmt='psql'))
+
 
 
 

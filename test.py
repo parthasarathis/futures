@@ -68,52 +68,27 @@ def get_tickers(partha_account,yesterday_df):
     print("\033c", end="")
     # print(tabulate(day_df,headers='keys',tablefmt='psql'))
    
+    up_df = day_df.sort_values('D_C_MIN',ascending=False)
+    print(pyfiglet.figlet_format("up", font="slant"))
+    print(tabulate(up_df.head(12),headers='keys',tablefmt='psql'))
 
-    always_up = day_df[(day_df['D_C_MIN'] < 50) & (day_df['D_MIN']>-0.5)]
-    print(pyfiglet.figlet_format("Always Up"))
-    print(tabulate(always_up,headers='keys',tablefmt='psql'))
-
-    always_down = day_df[(day_df['D_C_MAX'] > -50) & (day_df['D_MAX']<0.5)]
-    print(pyfiglet.figlet_format("Always Down"))
-    print(tabulate(always_down,headers='keys',tablefmt='psql'))
-
-    up=day_df[(day_df['PCT'] > 80)]
-    up = up.sort_values(by=['D_C_MIN','D_CHANGE'],ascending=[False,False])
-    print(pyfiglet.figlet_format("Going Up"))
-    print(tabulate(up,headers='keys',tablefmt='psql'))
-
-    down=day_df[(day_df['PCT'] < 20)]
-    down = down.sort_values(by=['D_C_MAX','D_CHANGE'],ascending=[True,True])
-    print(pyfiglet.figlet_format("Going Down"))
-    print(tabulate(down,headers='keys',tablefmt='psql'))
-
-    #print(tabulate(day_df,headers='keys',tablefmt='psql'))
-    up_df=day_df[(day_df['D_C_MIN'] < 50) & (day_df['D_C_MIN'] > 2) & (day_df['D_MIN']>-0.5)] 
-    up_df = up_df.sort_values(by=['D_C_MIN','D_CHANGE'],ascending=[False,False])
-    up_df['Status'] = up_df['PCT'].apply(lambda x: 'going down' if   x < 78.6 else 'up')
-    down_df=day_df[(day_df['D_C_MAX'] > -50) & (day_df['D_C_MAX'] < -2) & (day_df['D_MAX']<0.5)]
-    down_df = down_df.sort_values(by=['D_C_MAX','D_CHANGE'],ascending=[True,True])
-    down_df['Status'] = down_df['PCT'].apply(lambda x: 'going up' if  x > 23.6 else 'down')
+    down_df = day_df.sort_values('D_C_MAX',ascending=True)
+    print(pyfiglet.figlet_format("down", font="slant"))
+    print(tabulate(down_df.head(12),headers='keys',tablefmt='psql'))
 
 
 
-    # filtered_df = df[(df['column1'] > 10) & (df['column2'] == 'value')]
-
-    down_2_up = day_df[(day_df['D_C_MIN'] > 2.5) & (day_df['D_C_MIN'] < 1)]
-    down_2_up = down_2_up.sort_values(by=['D_C_MIN','D_CHANGE'],ascending=[False,False])
-    up_2_down = day_df[(day_df['D_C_MAX'] < -2.5) & (day_df['D_C_MAX'] > -1)]
-    up_2_down = up_2_down.sort_values(by=['D_C_MAX','D_CHANGE'],ascending=[True,True])
-
-    # print(pyfiglet.figlet_format("down_2_up" , font = "slant"))
-    # print(tabulate(down_2_up,headers='keys',tablefmt='psql'))
-    # print(pyfiglet.figlet_format("up_2_down" , font = "slant"))
-    # print(tabulate(up_2_down,headers='keys',tablefmt='psql'))
+    going_down = day_df[day_df['PCT'] < 20]
+    going_down = going_down.sort_values('D_C_MIN',ascending=True)
+    print(pyfiglet.figlet_format("going_down", font="slant"))
+    print(tabulate(going_down,headers='keys',tablefmt='psql'))
 
 
-    # print(pyfiglet.figlet_format("GOING UP" , font = "slant"))
-    # print(tabulate(up_df,headers='keys',tablefmt='psql'))
-    # print(pyfiglet.figlet_format("GOING DOWN" , font = "slant"))
-    # print(tabulate(down_df,headers='keys',tablefmt='psql'))
+    going_up = day_df[day_df['PCT'] > 85]
+    going_up = going_up.sort_values('D_C_MAX',ascending=False)       
+    print(pyfiglet.figlet_format("going_up", font="slant"))
+    print(tabulate(going_up,headers='keys',tablefmt='psql'))
+
 
     table_data.to_csv('total_data.csv',index=True)
     up_df.to_csv('up_df.csv',index=True)
@@ -141,7 +116,7 @@ def get_data(new_data=False):
         data = 0
         for coin in busd_list:
             klines = partha_account.futures_historical_klines(
-                coin, partha_account.KLINE_INTERVAL_1DAY, "1  ago UTC")
+                coin, partha_account.KLINE_INTERVAL_1DAY, "1 day ago UTC")
             if len(klines) > 0:
                 res = {key_list[i]: klines[0][i] for i in range(len(key_list))}
             else:
@@ -197,8 +172,11 @@ sch.every().day.at("17:30").do(get_data, new_data=True)
 sch.every().day.at("21:30").do(get_data, new_data=True)
 sch.every().day.at("01:30").do(get_data, new_data=True)
 sch.every().minute.at(":05").do(get_tickers, partha_account=partha_account, yesterday_df=previous_day_df)
+sch.every().minute.at(":15").do(get_tickers, partha_account=partha_account, yesterday_df=previous_day_df)
 sch.every().minute.at(":25").do(get_tickers, partha_account=partha_account, yesterday_df=previous_day_df)
+sch.every().minute.at(":35").do(get_tickers, partha_account=partha_account, yesterday_df=previous_day_df)
 sch.every().minute.at(":45").do(get_tickers, partha_account=partha_account, yesterday_df=previous_day_df)
+sch.every().minute.at(":55").do(get_tickers, partha_account=partha_account, yesterday_df=previous_day_df)
 
 while True:
     sch.run_pending()
