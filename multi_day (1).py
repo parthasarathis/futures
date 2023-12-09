@@ -23,7 +23,7 @@ endpoint = "https://fapi.binance.com/fapi/v1/klines"
 
 # Parameters for the API request
 
-interval = "1W"
+interval = "1d"
 limit = 10
 
 # Create an empty DataFrame
@@ -88,7 +88,7 @@ four_positive = df_combined[df_combined.iloc[:, -4:].gt(0).all(axis=1)]
 four_negative = df_combined[df_combined.iloc[:, -4:].lt(0).all(axis=1)]
 
 
-  rint(pyfiglet.figlet_format("one_positive"))
+print(pyfiglet.figlet_format("one_positive"))
 print(tabulate(one_positive, headers='keys', tablefmt='psql'))
 print(pyfiglet.figlet_format("one_negative"))
 print(tabulate(one_negative, headers='keys', tablefmt='psql'))
@@ -105,17 +105,17 @@ print(tabulate(four_positive, headers='keys', tablefmt='psql'))
 print(pyfiglet.figlet_format("four_negative"))
 print(tabulate(four_negative, headers='keys', tablefmt='psql'))    
 
-# Print the combined DataFrame with colors
-for column in df_combined:
-    print(f"{column.split('(')[-1].rstrip(')')} ", end="")
-    for value in df_combined[column]:
-        if pd.isna(value):
-            print("NaN", end=" ")
-        elif value >= 0:
-            print(f"\033[92m{value:+.6f}\033[0m", end=" ")  # Green for positive numbers
-        else:
-            print(f"\033[91m{value:+.6f}\033[0m", end=" ")  # Red for negative numbers
-    print()
+# # Print the combined DataFrame with colors
+# for column in df_combined:
+#     print(f"{column.split('(')[-1].rstrip(')')} ", end="")
+#     for value in df_combined[column]:
+#         if pd.isna(value):
+#             print("NaN", end=" ")
+#         elif value >= 0:
+#             print(f"\033[92m{value:+.6f}\033[0m", end=" ")  # Green for positive numbers
+#         else:
+#             print(f"\033[91m{value:+.6f}\033[0m", end=" ")  # Red for negative numbers
+#     print()
 
 
 # Drop the first empty column

@@ -52,6 +52,7 @@ def get_tickers(partha_account,yesterday_df):
     table_data['PCT'] = table_data['PCT'].astype(float)
     table_data['D_MAX'] = table_data['D_MAX'].round(3)
     table_data['D_MIN'] = table_data['D_MIN'].round(3)
+    table_data['SPREAD'] = (table_data['D_HIGH'] - table_data['D_LOW'])/table_data['D_LOW'] * 100
 
 
     table_data['D_CHANGE'] = (table_data['price'] - table_data['D_OPEN'])/table_data['D_OPEN'] * 100
@@ -61,38 +62,49 @@ def get_tickers(partha_account,yesterday_df):
     table_data['D_C_MIN'] = table_data['D_C_MIN'].round(3)
     table_data['D_C_MAX'] = table_data['D_C_MAX'].round(3)
    
-    day_df = table_data[['symbol','D_OPEN','D_HIGH','D_LOW','price','D_MAX','D_MIN','D_C_MAX','D_C_MIN','PCT','D_CHANGE']]
+    day_df = table_data[['symbol','D_OPEN','D_HIGH','D_LOW','price','D_MAX','D_MIN','D_C_MAX','D_C_MIN','PCT','SPREAD','D_CHANGE']]
     day_df = day_df.sort_values('D_C_MIN',ascending=False)
     day_df['PCT'] = day_df['PCT'].round(2)
 
     print("\033c", end="")
     # print(tabulate(day_df,headers='keys',tablefmt='psql'))
+
+
+    always_up = day_df[day_df['D_MIN'] > -0.5]
+    always_up = always_up.sort_values('D_C_MIN',ascending=False)
+    print(pyfiglet.figlet_format("always_up", font="slant"))
+    print(tabulate(always_up.head(12),headers='keys',tablefmt='psql'))
+
+    always_down = day_df[day_df['D_MAX'] < 0.5]
+    always_down = always_down.sort_values('D_C_MAX',ascending=True) 
+    print(pyfiglet.figlet_format("always_down", font="slant"))
+    print(tabulate(always_down.head(12),headers='keys',tablefmt='psql'))
    
-    up_df = day_df.sort_values('D_C_MIN',ascending=False)
-    print(pyfiglet.figlet_format("up", font="slant"))
-    print(tabulate(up_df.head(12),headers='keys',tablefmt='psql'))
+    # up_df = day_df.sort_values('D_C_MIN',ascending=False)
+    # print(pyfiglet.figlet_format("up", font="slant"))
+    # print(tabulate(up_df.head(12),headers='keys',tablefmt='psql'))
 
-    down_df = day_df.sort_values('D_C_MAX',ascending=True)
-    print(pyfiglet.figlet_format("down", font="slant"))
-    print(tabulate(down_df.head(12),headers='keys',tablefmt='psql'))
-
-
-
-    going_down = day_df[day_df['PCT'] < 20]
-    going_down = going_down.sort_values('D_C_MIN',ascending=True)
-    print(pyfiglet.figlet_format("going_down", font="slant"))
-    print(tabulate(going_down,headers='keys',tablefmt='psql'))
+    # down_df = day_df.sort_values('D_C_MAX',ascending=True)
+    # print(pyfiglet.figlet_format("down", font="slant"))
+    # print(tabulate(down_df.head(12),headers='keys',tablefmt='psql'))
 
 
-    going_up = day_df[day_df['PCT'] > 85]
-    going_up = going_up.sort_values('D_C_MAX',ascending=False)       
-    print(pyfiglet.figlet_format("going_up", font="slant"))
-    print(tabulate(going_up,headers='keys',tablefmt='psql'))
+
+    # going_down = day_df[day_df['PCT'] < 20]
+    # going_down = going_down.sort_values('D_C_MIN',ascending=True)
+    # print(pyfiglet.figlet_format("going_down", font="slant"))
+    # print(tabulate(going_down,headers='keys',tablefmt='psql'))
 
 
-    table_data.to_csv('total_data.csv',index=True)
-    up_df.to_csv('up_df.csv',index=True)
-    down_df.to_csv('down_df.csv',index=True)
+    # going_up = day_df[day_df['PCT'] > 85]
+    # going_up = going_up.sort_values('D_C_MAX',ascending=False)       
+    # print(pyfiglet.figlet_format("going_up", font="slant"))
+    # print(tabulate(going_up,headers='keys',tablefmt='psql'))
+
+
+    # table_data.to_csv('total_data.csv',index=True)
+    # up_df.to_csv('up_df.csv',index=True)
+    # down_df.to_csv('down_df.csv',index=True)
     
 
 def get_data(new_data=False):
