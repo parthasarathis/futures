@@ -21,11 +21,12 @@ coin_price = collections.deque([], maxlen=20)
 futures_type = FuturesType.USD_M
 
 key_list = ["open_time", "open_price", "high_price", "low_price", "close_price",
-                    "volume", "close_time", "asset_volume", "no_of_trades", "TBBAV", "TBQAV", "UNUSED"]
+            "volume", "close_time", "asset_volume", "no_of_trades", "TBBAV", "TBQAV", "UNUSED"]
 data = 0
-klines = partha_account.futures_historical_klines('RENUSDT', partha_account.KLINE_INTERVAL_1HOUR, "1 hour ago UTC")
+klines = partha_account.futures_historical_klines(
+    'ADAUSDT', partha_account.KLINE_INTERVAL_15MINUTE, "1 hour ago UTC")
 
 
-data = dict(zip(key_list, klines[0]))
+data = dict(zip(key_list, klines))
 
 pprint(data)
