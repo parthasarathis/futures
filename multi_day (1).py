@@ -36,21 +36,22 @@ if not path.exists("multiday_data.csv"):
     column_name_df = column_name_df[column_name_df['symbol'].str.endswith(
         'USDT')]
     symbols = column_name_df['symbol'].to_list()
-    data1 = 0   
+    data1 = 0
 
     for symbol in symbols:
         # Construct the API request URL
         params = {"symbol": symbol, "interval": interval, "limit": limit}
         response = requests.get(endpoint, params=params)
         data = response.json()
+        print(data)
         data1 += 1
         progress = f"getting data : {data1} / {len(symbols)}"
         print(progress, end="\r")
 
         # Convert the data to a DataFrame
         df = pd.DataFrame(data, columns=["Open Time", "Open", "High", "Low", "Close", "Volume", "Close Time",
-                                        "Quote Asset Volume", "Number of Trades", "Taker Buy Base Asset Volume",
-                                        "Taker Buy Quote Asset Volume", "Ignore"])
+                                         "Quote Asset Volume", "Number of Trades", "Taker Buy Base Asset Volume",
+                                         "Taker Buy Quote Asset Volume", "Ignore"])
         df["Open Time"] = pd.to_datetime(df["Open Time"], unit="ms").dt.date
         df["Close"] = pd.to_numeric(df["Close"])
 
@@ -60,62 +61,69 @@ if not path.exists("multiday_data.csv"):
 
         # Append to the combined DataFrame
         df_combined = pd.concat([df_combined, df[[column_name]]], axis=1)
-    
+
     df_combined.to_csv("multiday_data.csv")
     time.sleep(1)
 
 else:
     print("previous_data_found:")
     df_combined = pd.read_csv("multiday_data.csv")
-   
-
 
 
 # Rename the column header to "Open Time"
 # df_combined.rename(columns={"Open Time": "Open Time"}, inplace=True)
 
 # Sort the DataFrame by the last column in ascending order
-df_combined = df_combined.sort_values(by=df_combined.index[-1], axis=1,ascending=False)
+df_combined = df_combined.sort_values(
+    by=df_combined.index[-1], axis=1, ascending=False)
 df_combined = df_combined.transpose()
 
-one_positive = df_combined[(df_combined.iloc[:, -1:].gt(0).all(axis=1)) & (df_combined.iloc[:, -2].lt(0))]
-one_negative = df_combined[(df_combined.iloc[:, -1:].lt(0).all(axis=1))& (df_combined.iloc[:, -2].gt(0))]
-two_positive = df_combined[(df_combined.iloc[:, -2:].gt(0).all(axis=1)) & (df_combined.iloc[:, -3].lt(0))]
-two_negative = df_combined[(df_combined.iloc[:, -2:].lt(0).all(axis=1))& (df_combined.iloc[:, -3].gt(0))]
-three_positive = df_combined[(df_combined.iloc[:, -3:].gt(0).all(axis=1)) & (df_combined.iloc[:, -4].lt(0))]
-three_negative = df_combined[(df_combined.iloc[:, -3:].lt(0).all(axis=1))& (df_combined.iloc[:, -4].gt(0))]
+one_positive = df_combined[(
+    df_combined.iloc[:, -1:].gt(0).all(axis=1)) & (df_combined.iloc[:, -2].lt(0))]
+one_negative = df_combined[(
+    df_combined.iloc[:, -1:].lt(0).all(axis=1)) & (df_combined.iloc[:, -2].gt(0))]
+two_positive = df_combined[(
+    df_combined.iloc[:, -2:].gt(0).all(axis=1)) & (df_combined.iloc[:, -3].lt(0))]
+two_negative = df_combined[(
+    df_combined.iloc[:, -2:].lt(0).all(axis=1)) & (df_combined.iloc[:, -3].gt(0))]
+three_positive = df_combined[(
+    df_combined.iloc[:, -3:].gt(0).all(axis=1)) & (df_combined.iloc[:, -4].lt(0))]
+three_negative = df_combined[(
+    df_combined.iloc[:, -3:].lt(0).all(axis=1)) & (df_combined.iloc[:, -4].gt(0))]
 four_positive = df_combined[df_combined.iloc[:, -4:].gt(0).all(axis=1)]
 four_negative = df_combined[df_combined.iloc[:, -4:].lt(0).all(axis=1)]
 
 
-print(pyfiglet.figlet_format("one_positive"))
-print(tabulate(one_positive, headers='keys', tablefmt='psql'))
-print(pyfiglet.figlet_format("one_negative"))
-print(tabulate(one_negative, headers='keys', tablefmt='psql'))
-print(pyfiglet.figlet_format("two_positive"))
-print(tabulate(two_positive, headers='keys', tablefmt='psql'))
-print(pyfiglet.figlet_format("two_negative"))
-print(tabulate(two_negative, headers='keys', tablefmt='psql'))
-print(pyfiglet.figlet_format("three_positive"))
-print(tabulate(three_positive, headers='keys', tablefmt='psql'))
-print(pyfiglet.figlet_format("three_negative"))
-print(tabulate(three_negative, headers='keys', tablefmt='psql'))
-print(pyfiglet.figlet_format("four_positive"))
-print(tabulate(four_positive, headers='keys', tablefmt='psql'))
-print(pyfiglet.figlet_format("four_negative"))
-print(tabulate(four_negative, headers='keys', tablefmt='psql'))    
+# print(pyfiglet.figlet_format("one_positive"))
+# print(tabulate(one_positive, headers='keys', tablefmt='psql'))
+# print(pyfiglet.figlet_format("one_negative"))
+# print(tabulate(one_negative, headers='keys', tablefmt='psql'))
+# print(pyfiglet.figlet_format("two_positive"))
+# print(tabulate(two_positive, headers='keys', tablefmt='psql'))
+# print(pyfiglet.figlet_format("two_negative"))
+# print(tabulate(two_negative, headers='keys', tablefmt='psql'))
+# print(pyfiglet.figlet_format("three_positive"))
+# print(tabulate(three_positive, headers='keys', tablefmt='psql'))
+# print(pyfiglet.figlet_format("three_negative"))
+# print(tabulate(three_negative, headers='keys', tablefmt='psql'))
+# print(pyfiglet.figlet_format("four_positive"))
+# print(tabulate(four_positive, headers='keys', tablefmt='psql'))
+# print(pyfiglet.figlet_format("four_negative"))
+# print(tabulate(four_negative, headers='keys', tablefmt='psql'))
 
-# # Print the combined DataFrame with colors
-# for column in df_combined:
-#     print(f"{column.split('(')[-1].rstrip(')')} ", end="")
-#     for value in df_combined[column]:
-#         if pd.isna(value):
-#             print("NaN", end=" ")
-#         elif value >= 0:
-#             print(f"\033[92m{value:+.6f}\033[0m", end=" ")  # Green for positive numbers
-#         else:
-#             print(f"\033[91m{value:+.6f}\033[0m", end=" ")  # Red for negative numbers
-#     print()
+# Print the combined DataFrame with colors
+for column in df_combined:
+    print(f"{column.split('(')[-1].rstrip(')')} ", end="")
+    for value in df_combined[column]:
+        if pd.isna(value):
+            print("NaN", end=" ")
+        elif value >= 0:
+            # Green for positive numbers
+            print(f"\033[92m{value:+.6f}\033[0m", end=" ")
+        else:
+            # Red for negative numbers
+            print(f"\033[91m{value:+.6f}\033[0m", end=" ")
+    print()
 
 
 # Drop the first empty column
@@ -136,8 +144,3 @@ plt.legend()
 
 # Show the plot
 plt.show()
-
-
-
-
-
