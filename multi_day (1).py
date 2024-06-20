@@ -78,6 +78,11 @@ df_combined = df_combined.sort_values(
     by=df_combined.index[-1], axis=1, ascending=False)
 df_combined = df_combined.transpose()
 
+# Style the df_combined DataFrame
+styled_df_combined = df_combined.style.applymap(
+    lambda x: 'color: red' if x < 0 else 'color: green')
+# Display the styled DataFrame
+
 one_positive = df_combined[(
     df_combined.iloc[:, -1:].gt(0).all(axis=1)) & (df_combined.iloc[:, -2].lt(0))]
 one_negative = df_combined[(
@@ -124,23 +129,3 @@ for column in df_combined:
             # Red for negative numbers
             print(f"\033[91m{value:+.6f}\033[0m", end=" ")
     print()
-
-
-# Drop the first empty column
-df = four_positive
-
-# Plot each row as a separate line plot
-plt.figure(figsize=(12, 6))  # Adjust the figure size if needed
-for index, row in df.iterrows():
-    plt.plot(row.index, row, marker='o', label=row.name)
-
-# Add labels and title
-plt.xlabel('Columns')
-plt.ylabel('Values')
-plt.title('Line Plot of Rows in DataFrame')
-
-# Add a legend to distinguish between rows
-plt.legend()
-
-# Show the plot
-plt.show()

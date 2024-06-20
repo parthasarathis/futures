@@ -31,9 +31,9 @@ def plot_order_book_histogram(order_book, current_price, max_bid_quantity, max_b
              linewidth=2, label='Cumulative Ask Quantity')
 
     ax2 = ax1.twinx()  # Create a second y-axis on the right side
-    ax2.hist(bid_prices, bins=50, weights=bid_quantities, color='g',
+    ax2.hist(bid_prices, bins=100, weights=bid_quantities, color='g',
              alpha=0.7, label='Bids', orientation='horizontal')
-    ax2.hist(ask_prices, bins=50, weights=ask_quantities, color='r',
+    ax2.hist(ask_prices, bins=100, weights=ask_quantities, color='r',
              alpha=0.7, label='Asks', orientation='horizontal')
     ax2.axhline(y=max_ask_price, color='red',
                 linestyle='--', label='Max Bid Quantity')
@@ -84,7 +84,7 @@ def plot_order_book_histogram(order_book, current_price, max_bid_quantity, max_b
 
 def fetch_binance_futures_order_book(symbol, limit):
     exchange = ccxt.binance({
-        'rateLimit': 1000,
+        'rateLimit': 4000,
         'enableRateLimit': True,
         'adjustForTimeDifference': True
     })
@@ -142,7 +142,7 @@ def update_plot():
 
 
 if __name__ == '__main__':
-    symbol = 'HIGH/USDT'
+    symbol = 'SUI/USDT'
     limit = 100
     plt.figure(figsize=(10, 6))
     # Update plot every 5 seconds
