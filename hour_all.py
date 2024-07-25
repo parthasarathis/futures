@@ -15,17 +15,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
-usdt_list = [
-    "BTCUSDT", "ETHUSDT", "BNBUSDT", "ADAUSDT", "DOTUSDT",
-    "SOLUSDT", "XRPUSDT", "LINKUSDT", "LTCUSDT", "BCHUSDT",
-    "AVAXUSDT", "ALGOUSDT", "ATOMUSDT", "MATICUSDT", "XTZUSDT",
-    "FILUSDT", "VETUSDT", "TRXUSDT", "THETAUSDT", "ETCUSDT",
-    "NEOUSDT", "IOTAUSDT", "DASHUSDT", "CHZUSDT", "FTMUSDT",
-    "KSMUSDT", "ZECUSDT", "COMPUSDT", "SUSHIUSDT", "EGLDUSDT",
-    "WAVESUSDT", "ONEUSDT", "HBARUSDT", "FLOWUSDT", "RVNUSDT",
-    "ENJUSDT", "ZRXUSDT", "SUIUSDT", "MANAUSDT", "STMXUSDT",
-]
-
 
 # Binance API endpoint for futures prices
 endpoint = "https://fapi.binance.com/fapi/v1/klines"
@@ -186,11 +175,20 @@ def get_tickers(partha_account, yesterday_df):
     down_to_up = down_to_up.sort_values('D_C_MAX', ascending=True)
 
     return up_df, down_df, up1_df, down1_df, table_data, day_df, up_to_down, down_to_up
+    # print(pyfiglet.figlet_format("UP", font="slant"))
+    # print(tabulate(up_df.head(20), headers='keys', tablefmt='psql'))
+    # print(pyfiglet.figlet_format("DOWN", font="slant"))
+    # print(tabulate(down_df.head(20), headers='keys', tablefmt='psql'))
+
+    # print(pyfiglet.figlet_format("Moving UP", font="slant"))
+    # print(tabulate(up1_df.head(25), headers='keys', tablefmt='psql'))
+    # print(pyfiglet.figlet_format("Moving DOWN", font="slant"))
+    # print(tabulate(down1_df.head(25), headers='keys', tablefmt='psql'))
 
 
 def get_data(new_data=False):
     global previous_day_df
-    if not path.exists("previous_4h_data.csv") or new_data:
+    if not path.exists("previous_4hour_data.csv") or new_data:
         print("previous_data_not_found:")
         tickers = partha_account.futures_ticker()
         column_name_df = pd.DataFrame(tickers)
@@ -206,7 +204,7 @@ def get_data(new_data=False):
         data = 0
         for coin in busd_list:
             klines = partha_account.futures_historical_klines(
-                coin, partha_account.KLINE_INTERVAL_1HOUR, "1 hours ago UTC")
+                coin, partha_account.KLINE_INTERVAL_4HOUR, "4 hours ago UTC")
             if len(klines) > 0:
                 res = {key_list[i]: klines[0][i] for i in range(len(key_list))}
             else:
@@ -218,7 +216,7 @@ def get_data(new_data=False):
             print(coin)
             coin_data.append(res)
         coin_data_df = pd.DataFrame(coin_data)
-        coin_data_df.to_csv("previous_4h_data.csv")
+        coin_data_df.to_csv("previous_4hour_data.csv")
         previous_day_df = coin_data_df[[
             'symbol', 'open_price', 'high_price', 'low_price']]
         previous_day_df['high_price'] = previous_day_df['high_price'].astype(
@@ -239,7 +237,7 @@ def get_data(new_data=False):
         return previous_day_df
     else:
         print("Previous_data_found: Reading from CSV file")
-        coin_data_df = pd.read_csv("previous_4h_data.csv")
+        coin_data_df = pd.read_csv("previous_4hour_data.csv")
         previous_day_df = coin_data_df[[
             'symbol', 'open_price', 'high_price', 'low_price']]
         previous_day_df['high_price'] = previous_day_df['high_price'].astype(
@@ -285,15 +283,15 @@ def Today_data():
         actual_df.set_index('symbol', inplace=True)
 
         # Apply conditions based on time
-        if dt.datetime.now().time() < dt.time(8, 0):
-            possible_up = actual_df[(actual_df['D_MIN'] < -0.5) & (actual_df['D_MIN'] > -6) & (
+        if dt.datetime.now().time() < dt.time(12, 0):
+            possible_up = actual_df[(actual_df['D_MIN'] < -0.3) & (actual_df['D_MIN'] > -2) & (
                 actual_df['D_CHANGE'] > 0)].sort_values('D_CHANGE', ascending=False)
-            possible_down = actual_df[(actual_df['D_MAX'] > 0.5) & (actual_df['D_MAX'] < 6) & (
+            possible_down = actual_df[(actual_df['D_MAX'] > 0.3) & (actual_df['D_MAX'] < 2) & (
                 actual_df['D_CHANGE'] < 0)].sort_values('D_CHANGE', ascending=True)
         else:
-            possible_up = actual_df[(actual_df['D_MIN'] < -0.5) & (actual_df['D_MIN'] > -6) & (
+            possible_up = actual_df[(actual_df['D_MIN'] < -0.3) & (actual_df['D_MIN'] > -2) & (
                 actual_df['D_CHANGE'] > 2.0)].sort_values('D_CHANGE', ascending=False).head(10)
-            possible_down = actual_df[(actual_df['D_MAX'] > 0.5) & (actual_df['D_MAX'] < 6) & (
+            possible_down = actual_df[(actual_df['D_MAX'] > 0.3) & (actual_df['D_MAX'] < 2) & (
                 actual_df['D_CHANGE'] < -2.0)].sort_values('D_CHANGE', ascending=True).head(10)
 
         # Apply styling to possible_up and possible_down dataframes
@@ -351,36 +349,37 @@ def Today_data():
         # Display the top 15 up and down dataframes
         top_10_u_placeholder.text("##TOP 15 UP")
         top_10_d_placeholder.text("##TOP 15 DOWN")
-        styled_top_u = top.head(30).style.applymap(lambda x: 'color: red' if x < 0 else 'color: green', subset=['D_CHANGE']).applymap(
+        styled_top_u = top.head(20).style.applymap(lambda x: 'color: red' if x < 0 else 'color: green', subset=['D_CHANGE']).applymap(
             lambda x: 'color: violet' if x < -0.3 else 'color: blue', subset=['D_C_MAX']).applymap(lambda x: 'color: green' if x > -0.5 else 'color: red', subset=['D_MIN'])
-        styled_top_d = bottom.head(30).style.applymap(lambda x: 'color: green' if x > 0 else 'color: red', subset=['D_CHANGE']).applymap(
+        styled_top_d = bottom.head(20).style.applymap(lambda x: 'color: green' if x > 0 else 'color: red', subset=['D_CHANGE']).applymap(
             lambda x: 'color: violet' if x > 0.3 else 'color: blue', subset=['D_C_MIN']).applymap(lambda x: 'color: green' if x < 0.5 else 'color: red', subset=['D_MAX'])
         top_u_placeholder.dataframe(
-            styled_top_u, height=30*50)
+            styled_top_u, height=20*50)
         top_d_placeholder.dataframe(
-            styled_top_d, height=30*50)
+            styled_top_d, height=20*50)
 
         # Wait for 10 seconds
         time.sleep(10)
 
-
-def initialise(partha_account):
-    global previous_day_df
-    previous_day_df = get_data(new_data=True)
-    Today_data()
+    # Append to the combined DataFrame
 
 
 interval = "1d"
 limit = 10
 # Define the API endpoint
 
+
 previous_day_df = get_data()
 df_combined = pd.DataFrame()
 
+# Create a dictionary to map page names to their respective functions
+pages = {
+    "Page 1": Today_data,
+}
 
-while True:
-    current_time = dt.datetime.now().time()
-    if current_time.hour in [1, 5, 9, 13, 17, 21] and current_time.minute == 30:
-        initialise(partha_account)
-    get_tickers(partha_account=partha_account, yesterday_df=previous_day_df)
-    Today_data()
+# Create a selectbox to choose the page
+selected_page = st.sidebar.selectbox(
+    "Select a page", list(pages.keys()))
+
+# Call the selected page function
+pages[selected_page]()
